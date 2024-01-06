@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallpaper CRUD</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        #card {
+            background-color: #f0f0f0;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        #cardTitle {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4caf50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #4caf50;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div id="card">
+    <div id="cardTitle">Wallpaper App</div>
+    <form id="wallForm">
+
+        <label for="wallName">Wallpaper Name:</label>
+        <input type="text" id="wallName" name="wallName" required>
+
+        <label for="url">Wallpaper URL:</label>
+        <input type="text" id="url" name="url" required>
+
+        <button type="button" onclick="addWallpaper()">Add Wallpaper</button>
+        <button type="button" onclick="viewWallpapers()">View Wallpapers</button>
+    </form>
+</div>
+
+<div class="toast" id="toastMessage">Wallpaper added successfully!</div>
+<script>
+    function addWallpaper() {
+        const wallName = document.getElementById('wallName').value;
+        const url = document.getElementById('url').value;
+
+        if (!wallName || !url) {
+            alert("Please fill in all fields.");
+            return;
+        }
+
+        // Fetch existing data to get the last ID
+        fetch("https://todo-webapp-7c895-default-rtdb.firebaseio.com/Latest.json")
+            .then(response => response.json())
+            .then(data => {
+                // Get an array of existing document IDs
+                const existingIds = data ? Object.keys(data) : [];
+                // Find the maximum ID in the array
+                const lastId = existingIds.length > 0 ? Math.max(...existingIds.map(id => parseInt(id))) : 0;
+                const newWallpaperId = lastId + 1;
+                const newWallpaper = {
+                    wallId: newWallpaperId,
+                    wallName: wallName,
+                    url: url
+                };
+
+                // POST request to add a new resource
+                fetch(`https://todo-webapp-7c895-default-rtdb.firebaseio.com/Latest/${newWallpaperId}.json`, {
+                    method: 'PUT', // Use PUT to specify the document ID
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(newWallpaper),
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error("Network response was not OK");
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log("New wallpaper added successfully:", data);
+                        showToastMessage();
+                    })
+                    .catch(error => console.error("Error in PUT request:", error));
+            })
+            .catch(error => console.error("Error fetching existing data:", error));
+    }
+
+    function showToastMessage() {
+        const toastMessage = document.getElementById('toastMessage');
+        toastMessage.style.display = 'block';
+        setTimeout(() => {
+            toastMessage.style.display = 'none';
+        }, 3000); // Hide the message after 3 seconds
+    }
+
+    function viewWallpapers() {
+        window.open('viewWallpapers.html', '_blank');
+    }
+</script>
+
+</body>
+</html>
