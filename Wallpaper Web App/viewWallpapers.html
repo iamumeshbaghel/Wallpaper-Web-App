@@ -117,7 +117,7 @@
     // Fetch wallpapers from the API endpoint with a progress bar
     const progressBar = document.getElementById('progress-bar');
 
-    fetch("https://todo-webapp-7c895-default-rtdb.firebaseio.com/Latest.json")
+    fetch("https://yourprojectname-default-rtdb.firebaseio.com/Latest.json") //change your firebase realtime db url
         .then(response => response.json())
         .then(data => {
             // Check if there is data
